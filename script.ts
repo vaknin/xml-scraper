@@ -58,7 +58,7 @@ function readFile(filename){
             
             await extract('<City Code="', '"', 'City Code');
             await extract('<Item Code="', '"', 'Item Code');
-            await extract('<![CDATA[', ']', 'Hotel Name');
+            await extract(`<Item Code="${object['Item Code']}"><![CDATA[`, ']', 'Hotel Name');
             await extract('<AddressLine1><![CDATA[', ']', 'Address Line 1');
             await extract('<AddressLine2><![CDATA[', ']', 'Address Line 2');
             await extract('<AddressLine3><![CDATA[', ']', 'Address Line 3');
@@ -77,7 +77,7 @@ function readFile(filename){
             for (let key of Object.keys(object)){
                 fs.appendFileSync('data.txt', `${object[key]}|`);
             }
-    
+
             //Print a new line at the end of every xml file
             fs.appendFileSync('data.txt', `\n`);
             resolve();
