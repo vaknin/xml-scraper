@@ -29,7 +29,7 @@ function readFile(filename){
     return new Promise(resolve => {
         let path = `${folder}${filename}`;
     
-        fs.readFile(path, (err, data) => {
+        fs.readFile(path, async (err, data) => {
     
             if (err){
                 console.log(err);
@@ -39,34 +39,39 @@ function readFile(filename){
             let d:string = data.toString();
     
             function extract(string, end, field){
-                let i = d.indexOf(string);
 
-                //Make sure the field exists
-                let value = d.substring(i + string.length, d.indexOf(end, i + string.length));
+                return new Promise(resolve => {
+                    let i = d.indexOf(string);
 
-                if (i == -1){
-                    value = 'null';
-                }
-
-                object[field] = value;
+                    //Make sure the field exists
+                    let value = d.substring(i + string.length, d.indexOf(end, i + string.length));
+    
+                    if (i == -1){
+                        value = 'null';
+                    }
+    
+                    object[field] = value;
+                    resolve();
+                })
+                
             }
             
-            extract('<City Code="', '"', 'City Code');
-            extract('<Item Code="', '"', 'Item Code');
-            extract('<![CDATA[', ']', 'Hotel Name');
-            extract('<AddressLine1><![CDATA[', ']', 'Address Line 1');
-            extract('<AddressLine2><![CDATA[', ']', 'Address Line 2');
-            extract('<AddressLine3><![CDATA[', ']', 'Address Line 3');
-            extract('<AddressLine4><![CDATA[', ']', 'Address Line 4');
-            extract('Telephone><![CDATA[', ']', 'Telephone');
-            extract('Fax><![CDATA[', ']', 'Fax');
-            extract('EmailAddress>', '</Emai', 'Email');
-            extract('<WebSite>', '</WebSite>', 'Website');
-            extract('<StarRating>', '</StarRa', 'Star Rating');
-            extract('<Latitude>', '</Latitude>', 'Latitude');
-            extract('<Longitude>', '</Longitude>', 'Longitude');
-            extract('<AddressLine3><![CDATA[', ']', 'City Name');
-            extract('<AddressLine4><![CDATA[', ']', 'Country Name');
+            await extract('<City Code="', '"', 'City Code');
+            await extract('<Item Code="', '"', 'Item Code');
+            await extract('<![CDATA[', ']', 'Hotel Name');
+            await extract('<AddressLine1><![CDATA[', ']', 'Address Line 1');
+            await extract('<AddressLine2><![CDATA[', ']', 'Address Line 2');
+            await extract('<AddressLine3><![CDATA[', ']', 'Address Line 3');
+            await extract('<AddressLine4><![CDATA[', ']', 'Address Line 4');
+            await extract('Telephone><![CDATA[', ']', 'Telephone');
+            await extract('Fax><![CDATA[', ']', 'Fax');
+            await extract('EmailAddress>', '</Emai', 'Email');
+            await extract('<WebSite>', '</WebSite>', 'Website');
+            await extract('<StarRating>', '</StarRa', 'Star Rating');
+            await extract('<Latitude>', '</Latitude>', 'Latitude');
+            await extract('<Longitude>', '</Longitude>', 'Longitude');
+            await extract('<AddressLine3><![CDATA[', ']', 'City Name');
+            await extract('<AddressLine4><![CDATA[', ']', 'Country Name');
     
             //Print to data.txt
             for (let key of Object.keys(object)){
@@ -82,10 +87,17 @@ function readFile(filename){
 
 async function start(){
     let xmls = await getFileNames();
+    let percentage = 0;
 
     for(let f of xmls){
         await readFile(f);
-        console.log(`${xmls.indexOf(f) + 1}/${xmls.length}`);
+        let currPercentage = Math.floor((xmls.indexOf(f) + 1) / xmls.length * 100);
+        
+        if (currPercentage > percentage){
+            percentage = currPercentage;
+            console.clear();
+            console.log(percentage + '%');
+        }
     }
 }
 
